@@ -69,13 +69,9 @@ _______
 
 /usr/pgsql-12/bin/postgresql-12-setup initdb
 systemctl enable postgresql-12
-systemctl start postgresql-12
 
-#Check your work
-ps aux | grep postgres
-systemctl status postgresql-12 -l
+#Edit PG HBA for password auth and listen addresses. What is happening here is the addition of the password authentication from the local machine only. Until firewalld is modified this is not allowing external connections, but, it will be configured to be allowed from the start requiring on firewalld modification later. 
 
-#Edit PG HBA for password auth
 /var/lib/pgsql/9.6/data/pg_hba.conf
 
 # IPv4 local connections:
@@ -83,6 +79,43 @@ host    all             all             127.0.0.1/32            md5
 # IPv6 local connections:
 host    all             all             ::1/128                 md5
 
+#add this to the end to allow import/export functions direct to pqsql. Again, this is not allowed until firewalld is modified.
+host    all             all             0.0.0.0/0               md5
+
+#modify PGSql listeners
+nano /var/lib/pgsql/12/data/postgresql.conf
+Uncomment
+  listen_addresses = '*'
+
+#Start PostgreSQL
+systemctl start postgresql-12
+
+#Check your work
+ps aux | grep postgres
+systemctl status postgresql-12 -l
+ss -l -n | grep 5432
+
+#check it's alive
+  sudo su postgres -
+  psql
+  SELECT version();
+  \q
+  psql -l
+  exit
+  
+#make a password!!
+sudo su postgres -
+
+bash-4.2$ psql
+postgres=# \password
+Enter new password: ko*Uy32f5Jh9----this isn't used anywhere. never use this
+Enter it again: ko*Uy32f5Jh9----this isn't used anywhere. never use this
+postgres=# \q
+exit
+
+TEST YOUR WORK
+psql -h 127.0.0.1 -p 5432 -U postgres -W
+postgres=# 
 
 
 
