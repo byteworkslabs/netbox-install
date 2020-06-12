@@ -4,7 +4,7 @@ Depending on the state of the server that is provided you may have to perform su
 BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
 
 #Got root?
-Sudo su
+su -
 
 #Got subscription?
 subscription-manager list
@@ -23,26 +23,68 @@ yum repolist
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 subscription-manager repos --enable "rhel-*-optional-rpms" --enable "rhel-*-extras-rpms" --enable "rhel-ha-for-rhel-*-server-rpms"
+subscription-manager repos --enable rhel-7-server-devtools-rpms
+subscription-manager repos --enable rhel-server-rhscl-7-rpms
 
-#Check for the New Repo
+cd /etc/pki/rpm-gpg
+wget -O RPM-GPG-KEY-redhat-devel https://www.redhat.com/security/data/a5787476.txt
+rpm --import RPM-GPG-KEY-redhat-devel
+
+#Check for the New Repos
 yum repolist
 rpm -qa | grep epel
 
 #UPDATE THE SYSTEM/RESOLVE DEPENDENCIES
 yum update
 
-#Got NTP?? Nano??- Set it up and fix it.
-yum install ntp nano
+#Got NTP?? Nano?? Wget?- Set it up and fix it.
+yum install ntp nano wget
+
 nano /etc/ntpd.conf
   server _insert internal NTP server here_ iburst
 service ntpd restart
 chkconfig ntpd on
 systemctl status ntpd
 
-#Reboot because you can
+#Disable SELinux
+nano /etc/selinux/config
+  =disabled
+
+#Reboot because you can after SELinux Change
 reboot
 
- 
+#Set up YUM to Exclude PostgreSQL from base packages
+nano /etc/yum/pluginconf.d/rhnplugin.conf
+  in section [main] add
+    exclude=postgresql*
+
+#Set up package dependencies
+yum install -y git gcc llvm-toolset-7.0
+
+#At the time of this writing this is for version Postgresql 12
+
+yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+yum install postgresql12-server postgresql12-devel
+_______
+
+/usr/pgsql-12/bin/postgresql-12-setup initdb
+systemctl enable postgresql-12
+systemctl start postgresql-12
+
+#Check your work
+ps aux | grep postgres
+systemctl status postgresql-12 -l
+
+#Edit PG HBA for password auth
+/var/lib/pgsql/9.6/data/pg_hba.conf
+
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5
+
+
+
 
 
 
