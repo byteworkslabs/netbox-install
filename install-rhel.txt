@@ -117,6 +117,33 @@ TEST YOUR WORK
 psql -h 127.0.0.1 -p 5432 -U postgres -W
 postgres=# 
 
+#CREATE DATABASE AND USER
+postgres=# CREATE DATABASE netbox;
+CREATE DATABASE
+postgres=# CREATE USER netbox WITH PASSWORD 'ko*Uy32f5Jh9--NEVER USE OR COPYPASTE';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
+GRANT
+postgres=# \l
+postgres=# \q
+
+#####
+# At this point the server is NOW a Database server running locally allowed connections. 
+# FirewallD is preventing external host connections, but this should be a good time to inform of a new service on the network to Sec
+#
+####
+
+####
+# Install REDIS and jemalloc dependancy
+####
+yum install -y redis
+systemctl enable redis
+systemctl start redis
+redis-cli ping
+
+
+
+
 
 
 
