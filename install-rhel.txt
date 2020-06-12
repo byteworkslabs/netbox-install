@@ -1,0 +1,147 @@
+Documentation for RHEL 7 Installation of NetBox (and various other things to do on RHEL)
+Depending on the state of the server that is provided you may have to perform subscription management and system updates prior to starting the package installations.
+
+BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
+
+#Got root?
+Sudo su
+
+#Got subscription?
+subscription-manager list
+
+#If _not_ fix subscription
+subscription-manager register --username mailID@domain.com --password ********** --auto-attach
+subscription manager refresh
+
+#  If auto attach doesn't work at the register run
+  subscription-manager attach --auto
+
+#Got Yum? Yum will return an error if the subscription is not assigned.
+yum repolist
+
+#Enable EPEL Repo, update and fix depedencies
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+subscription-manager repos --enable "rhel-*-optional-rpms" --enable "rhel-*-extras-rpms" --enable "rhel-ha-for-rhel-*-server-rpms"
+
+#Check for the New Repo
+yum repolist
+rpm -qa | grep epel
+
+#UPDATE THE SYSTEM/RESOLVE DEPENDENCIES
+yum update
+
+#Got NTP?? Nano??- Set it up and fix it.
+yum install ntp nano
+nano /etc/ntpd.conf
+  server _insert internal NTP server here_ iburst
+service ntpd restart
+chkconfig ntpd on
+systemctl status ntpd
+
+#Reboot because you can
+reboot
+
+ 
+
+
+
+#
+
+#!/usr/bin/env bash
+# Check SELinux
+
+
+
+
+
+
+Loaded plugins: product-id, search-disabled-repos, subscription-manager
+epel-release-latest-7.noarch.rpm                                                                 |  15 kB  00:00:00
+Examining /var/tmp/yum-root-lbXDIY/epel-release-latest-7.noarch.rpm: epel-release-7-12.noarch
+Marking /var/tmp/yum-root-lbXDIY/epel-release-latest-7.noarch.rpm to be installed
+Resolving Dependencies
+--> Running transaction check
+---> Package epel-release.noarch 0:7-12 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+========================================================================================================================
+ Package                    Arch                 Version              Repository                                   Size
+========================================================================================================================
+Installing:
+ epel-release               noarch               7-12                 /epel-release-latest-7.noarch                24 k
+
+Transaction Summary
+========================================================================================================================
+Install  1 Package
+
+Total size: 24 k
+Installed size: 24 k
+Is this ok [y/d/N]: y
+Downloading packages:
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : epel-release-7-12.noarch                                                                             1/1
+rhel-7-server-rpms/7Server/x86_64/productid                                                      | 2.1 kB  00:00:00
+  Verifying  : epel-release-7-12.noarch                                                                             1/1
+
+Installed:
+  epel-release.noarch 0:7-12
+
+Complete!
+
+subscription-manager repos --enable "rhel-*-optional-rpms" --enable "rhel-*-extras-rpms" --enable "rhel-ha-for-rhel-*-server-rpms"
+
+#Repository 'rhel-7-server-optional-rpms' is enabled for this system.
+#Repository 'rhel-7-server-eus-optional-rpms' is enabled for this system.
+#Repository 'rhel-7-server-e4s-optional-rpms' is enabled for this system.
+#Repository 'rhel-ha-for-rhel-7-server-rpms' is enabled for this system.
+#Repository 'rhel-7-server-extras-rpms' is enabled for this system.
+
+
+yum repolist
+Loaded plugins: product-id, search-disabled-repos, subscription-manager
+rhel-7-server-e4s-optional-rpms                                                                  | 3.8 kB  00:00:00
+rhel-7-server-eus-optional-rpms                                                                  | 3.2 kB  00:00:00
+rhel-7-server-extras-rpms                                                                        | 3.4 kB  00:00:00
+rhel-7-server-optional-rpms                                                                      | 3.2 kB  00:00:00
+rhel-7-server-rpms                                                                               | 3.5 kB  00:00:00
+rhel-ha-for-rhel-7-server-rpms                                                                   | 3.5 kB  00:00:00
+(1/15): rhel-7-server-e4s-optional-rpms/7Server/x86_64/updateinfo                                | 2.1 MB  00:00:00
+(2/15): rhel-7-server-e4s-optional-rpms/7Server/x86_64/group                                     |  26 kB  00:00:00
+(3/15): rhel-7-server-e4s-optional-rpms/7Server/x86_64/primary_db                                | 9.4 MB  00:00:00
+(4/15): rhel-7-server-eus-optional-rpms/7Server/x86_64/group                                     |  22 kB  00:00:00
+(5/15): rhel-7-server-extras-rpms/x86_64/updateinfo                                              | 229 kB  00:00:00
+(6/15): rhel-7-server-eus-optional-rpms/7Server/x86_64/updateinfo                                | 1.8 MB  00:00:00
+(7/15): rhel-7-server-extras-rpms/x86_64/group                                                   |  124 B  00:00:00
+(8/15): rhel-7-server-extras-rpms/x86_64/primary_db                                              | 622 kB  00:00:00
+(9/15): rhel-7-server-eus-optional-rpms/7Server/x86_64/primary_db                                | 6.1 MB  00:00:00
+(10/15): rhel-7-server-optional-rpms/7Server/x86_64/group                                        |  22 kB  00:00:00
+(11/15): rhel-7-server-optional-rpms/7Server/x86_64/updateinfo                                   | 2.7 MB  00:00:00
+(12/15): rhel-ha-for-rhel-7-server-rpms/7Server/x86_64/updateinfo                                | 129 kB  00:00:00
+(13/15): rhel-ha-for-rhel-7-server-rpms/7Server/x86_64/group                                     |  13 kB  00:00:00
+(14/15): rhel-7-server-optional-rpms/7Server/x86_64/primary_db                                   | 9.1 MB  00:00:00
+(15/15): rhel-ha-for-rhel-7-server-rpms/7Server/x86_64/primary_db                                | 460 kB  00:00:00
+repo id                                        repo name                                                          status
+epel/x86_64                                    Extra Packages for Enterprise Linux 7 - x86_64                     13,322
+rhel-7-server-e4s-optional-rpms/7Server/x86_64 Red Hat Enterprise Linux 7 Server - Update Services for SAP Soluti 19,876
+rhel-7-server-eus-optional-rpms/7Server/x86_64 Red Hat Enterprise Linux 7 Server - Extended Update Support - Opti 13,717
+rhel-7-server-extras-rpms/x86_64               Red Hat Enterprise Linux 7 Server - Extras (RPMs)                   1,285
+rhel-7-server-optional-rpms/7Server/x86_64     Red Hat Enterprise Linux 7 Server - Optional (RPMs)                21,290
+rhel-7-server-rpms/7Server/x86_64              Red Hat Enterprise Linux 7 Server (RPMs)                           29,125
+rhel-ha-for-rhel-7-server-rpms/7Server/x86_64  Red Hat Enterprise Linux High Availability (for RHEL 7 Server) (RP    750
+repolist: 99,365
+
+
+
+# ________________________________________________________________
+# yum install -y gcc python36 python36-devel python36-setuptools libxml2-devel libxslt-devel libffi-devel openssl-devel redhat-rpm-config
+# easy_install-3.6 pip
+
+# Install Git and download application
+yum install -y git
+git clone -b master https://github.com/netbox-community/netbox.git .
