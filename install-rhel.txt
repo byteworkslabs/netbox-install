@@ -256,6 +256,8 @@ In this case it was svcnetbox
 User=svcnetbox
 Group=svcnetbox
 
+Add note about nginx PID needs /run and not /var/run for nginx.conf
+
 
 
 
