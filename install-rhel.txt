@@ -3,6 +3,10 @@ Depending on the state of the server that is provided you may have to perform su
 
 Several features of this install, such as Python, are from the Red Hat Software Collections. Which means you're getting directly supported packages from Red Hat. 
 
+## management of the box
+scl enable rh-python36 bash
+source /opt/netbox/venv/bin/activate
+
 BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
 
 #Got root?
@@ -157,11 +161,61 @@ yum install rh-python36
 #With Red Hat you will have Pip 3.6 when you enable to the software collection in your normal user path. 
 # Exit Root
 exit
+scl enable rh-python36 bash
+
 python3 -V
   Python 3.6.9
 pip -V
   pip 9.0.1 from /opt/rh/rh-python36/root/usr/lib/python3.6/site-packages (python 3.6)
-  
+
+#Netbox Clone as root to create directory
+mkdir -p /opt/netbox/ && cd /opt/netbox/
+git clone -b master https://github.com/netbox-community/netbox.git .
+chown --recursive netbox /opt/netbox/netbox/media/
+
+#Now Build the Python VENV in the /opt/netbox
+#Activate the VENV First and check with "#which python /opt/rh/rh-python36/root/usr/bin/python"
+cd /opt/netbox
+scl enable rh-python36 bash
+python3.6 -m venv /opt/netbox/venv
+source venv/bin/activate
+
+#This is this pip install and you should be at this prompt. This will install into the VENV
+(venv) [root@ggc-netbox-01 netbox]# pip3.6 install -r requirements.txt
+
+#Add Napalm
+pip3.6 install napalm
+echo napalm >> local_requirements.txt
+
+#DO the netbox configuration
+(venv) # cd netbox/netbox/
+(venv) # cp configuration.example.py configuration.py
+
+#Generate a Django secret
+./generate_secret_key.py
+
+nano configuration.py
+ALLOWED_HOSTS = ['netbox.ggc.edu, 'ggc-netbox-01.ggc.edu', '10.42.206.36']
+DATABASE = {
+    'NAME': 'netbox',         # Database name
+    'USER': 'netbox',               # PostgreSQL username
+SECRET_KEY = 'BN9Me!o(C=H1PGpsy)TA2$4O@+DJYZ5_hzkIug^f#b7&XSriKw'
+
+#NOW DO the Database schema
+/opt/netbox/netbox/python3.6 manage.py migrate
+
+#Now Create superuser
+python3.6 manage.py createsuperuser
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -186,6 +240,19 @@ pip -V
 
 
 
+
+rm -rf /etc/ssh/ssh_host_*
+    2  touch /.unconfigured
+    3  sed -ie 's/RUN_FIRSTBOOT=NO/RUN_FIRSTBOOT=YES/' /etc/sysconfig/firstboot
+    4  systemctl enable firstboot-graphical
+    5  systemctl enable initial-setup-graphical
+    6  shutdown -now
+    7  shutdown -h now
+    8  subscription-manager register --username et.license@ggc.edu --password  --auto-attach
+    9  ifconfig
+   10  useradd -c 'Svc Netbox' -m -G wheel svcnetbox
+   11  passwd svcnetbox
+   12  passwd
 
 Loaded plugins: product-id, search-disabled-repos, subscription-manager
 epel-release-latest-7.noarch.rpm                                                                 |  15 kB  00:00:00
