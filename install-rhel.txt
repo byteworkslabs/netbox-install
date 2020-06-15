@@ -1,6 +1,8 @@
 Documentation for RHEL 7 Installation of NetBox (and various other things to do on RHEL)
 Depending on the state of the server that is provided you may have to perform subscription management and system updates prior to starting the package installations.
 
+Several features of this install, such as Python, are from the Red Hat Software Collections. Which means you're getting directly supported packages from Red Hat. 
+
 BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
 
 #Got root?
@@ -140,6 +142,33 @@ yum install -y redis
 systemctl enable redis
 systemctl start redis
 redis-cli ping
+
+
+########## Install more packages. The @development package installs redhat-rpm-config NetBox dependency. The other packages here are dependencies for Python so you might as well get them now before you make your choices on Python. 
+su -
+yum install @development
+yum install openssl-devel bzip2-devel libffi-devel libxml2-devel libxslt-devel
+
+#At this point you're ready for Python. Reminder - in this installation we're using Red Hat software collections.
+##NetBox says you need these three - python36 python36-devel python36-setuptools
+
+yum install rh-python36
+
+#With Red Hat you will have Pip 3.6 when you enable to the software collection in your normal user path. 
+# Exit Root
+exit
+python3 -V
+  Python 3.6.9
+pip -V
+  pip 9.0.1 from /opt/rh/rh-python36/root/usr/lib/python3.6/site-packages (python 3.6)
+  
+
+
+
+
+
+
+
 
 
 
