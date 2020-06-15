@@ -208,6 +208,63 @@ SECRET_KEY = 'BN9Me!o(C=H1PGpsy)TA2$4O@+DJYZ5_hzkIug^f#b7&XSriKw'
 python3.6 manage.py createsuperuser
 
 
+####################
+TEST YOUR WORK
+####################
+firewall-cmd --zone=public --add-port=8000/tcp
+python3.6 manage.py runserver 0.0.0.0:8000 --insecure
+
+####################
+NGINX
+/etc/yum.repos.d/nginx.repo with the following contents:
+
+    [nginx-mainline]
+    name=nginx mainline repo
+    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=0
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+
+yum-config-manager --enable nginx-mainline
+yum update
+yum install nginx
+#At the time of writing this is nginx 1.19 mainline
+
+Prepare the Web daemon
+systemctl enable nginx
+firewall-cmd --zone=public --permanent --add-service=http
+firewall-cmd --zone=public --permanent --add-service=https
+firewall-cmd --reload
+openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout /etc/ssl/certs/netbox.key -out /etc/ssl/certs/netbox.crt
+
+Move the config file to /etc/nginx/conf.d
+cp /opt/netbox/contrib/nginx.conf /etc/nginx/conf.d/netbox.ggc.edu.conf
+nano netbox.ggc.edu.conf
+
+    # CHANGE THIS TO YOUR SERVER'S NAME
+    server_name netbox.ggc.edu;
+
+    ssl_certificate /etc/ssl/certs/netbox.crt;
+    ssl_certificate_key /etc/ssl/certs/netbox.key;
+
+#Enable Gunicorn execute
+cp contrib/gunicorn.py /opt/netbox/gunicorn.py
+
+Check the netbox.service and netbox-rq.service in systemd for the actual user that's available on the system
+In this case it was svcnetbox
+User=svcnetbox
+Group=svcnetbox
+
+
+
+
+
+
+
+
+
+
 
 
 
