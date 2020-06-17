@@ -7,6 +7,9 @@ Several features of this install, such as Python, are from the Red Hat Software 
 scl enable rh-python36 bash
 source /opt/netbox/venv/bin/activate
 
+##upgrade script needs modification to run with the python3.6
+/usr/bin to python3.6
+
 BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
 
 #Got root?
