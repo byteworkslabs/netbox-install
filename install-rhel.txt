@@ -10,6 +10,14 @@ source /opt/netbox/venv/bin/activate
 ##upgrade script needs modification to run with the python3.6
 /usr/bin to python3.6
 
+su -
+cd /opt/netbox
+scl enable rh-python36 bash
+git checkout master
+git pull origin master
+git status
+./upgrade.sh
+
 BEGIN INTERACTIVE - COMMANDS HERE REQUIRE ACKNOWLEDGEMENT
 
 #Got root?
