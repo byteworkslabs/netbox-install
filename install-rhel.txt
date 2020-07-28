@@ -413,3 +413,19 @@ repolist: 99,365
 # Install Git and download application
 yum install -y git
 git clone -b master https://github.com/netbox-community/netbox.git .
+
+_______________-
+adding more scratch notes for backup
+#!/bin/bash
+DATETIME=`date +%Y%m%d-%H%M`
+MAXDAYS=45
+pg_dump "host=localhost user=netbox dbname=netbox" | gzip > netbox-dump-$DATETIME.sql.gz
+find . -name netbox-dump-*.sql.gz -mtime +$MAXDAYS -exec rm {} \;
+
+.pgpass
+chmod 0600 ~/.pgpass
+localhost:*:netbox:netbox:PASSWORD
+
+To automate the backup, I switched over to the postgres user (su - postgres) and added this to its crontab (crontab -e). This example runs it every 30 minutes:
+
+0 2 * * * /home/svcnetbox/netbox-db-backup.sh >> /tmp/netbox-backup/backup.log 2>&1
